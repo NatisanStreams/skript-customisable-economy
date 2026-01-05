@@ -1,0 +1,31 @@
+options:
+    starter_balance: 0
+    name: &eCoins
+    prefix: &f[&eECONOMY&f]
+
+on join:
+    if {balance::%player's uuid%} is not set:
+        set {balance::%player's uuid%} to {@starter_balance}
+
+
+command /coins [<text>] [<player>] [<integer>]:
+    trigger:
+        if arg-1 is "balance":
+            send "{@prefix} &fYour balance is %{balance::%player's uuid%}% {@name}" to player
+        if arg-1 is "pay":
+            if arg-2 is set:
+                if arg-3 is set:
+                    if arg-3 is less than or equal to {balance::%player's uuid%}:
+                        if arg-3 is more than 0:
+                            remove arg-3 from {balance::%player's uuid%}
+                            add arg-3 to {balance::%arg-2's uuid%}
+                            send "{@prefix} &fYou have sent &e%arg-3% {@name} &fto %arg-2%" to player
+                            send "{@prefix} &fYou have received &e%arg-3% {@name} &ffrom %player%"
+                            play sound "entity.experience_orb.pickup" with volume 0.5 to player
+                            play sound "entity.experence_orb.pickup" with volume 0.5 to arg-2
+                        else:
+                            send "{@prefix} &cYou cannot send negative numbers" to player
+                            play sound "entity.villager.no" with volume 0.5 to player
+                    else:
+                        send "{@prefix} &cYou don't have enough money to send this much" to player
+                        play sound "entity.villager.no" with volume 0.5 to player
