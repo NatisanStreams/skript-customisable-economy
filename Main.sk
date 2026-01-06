@@ -12,11 +12,15 @@ function addBalance(p: offlineplayer, amount: integer):
 function removeBalance(p: offlineplayer, amount: integer):
     remove {_amount} from {balance::%{_p}'s uuid%}
 
+function setBalance(p: offlineplayer, amount: integer):
+    set {balance::%{_p}'s uuid%} to {_amount}
+
 
 options:
     starter_balance: 0
-    name: &eCoins
-    prefix: &f[&eECONOMY&f]
+    name: <white>Coins
+    prefix: <white>[<yellow>ECONOMY<white>]
+    no: play sound "entity.villager.no" with volume 0.5
 
 on join:
     if {balance::%player's uuid%} is not set:
@@ -26,7 +30,7 @@ on join:
 command /eco [<text>] [<player>] [<integer>]:
     trigger:
         if arg-1 is "balance":
-            send "{@prefix} &fYour balance is %{balance::%player's uuid%}% {@name}" to player
+            send "{@prefix} <white>Your balance is %{balance::%player's uuid%}% {@name}" to player
         if arg-1 is "pay":
             if arg-2 is set:
                 if arg-3 is set:
@@ -34,16 +38,19 @@ command /eco [<text>] [<player>] [<integer>]:
                         if arg-3 is more than 0:
                             removeBalance(player, arg-3)
                             addBalance(arg-2, arg-3)
-                            send "{@prefix} &fYou have sent &e%arg-3% {@name} &fto %arg-2%" to player
-                            send "{@prefix} &fYou have received &e%arg-3% {@name} &ffrom %player%"
+                            send "{@prefix} <white>You have sent <yellow>%arg-3% {@name} <white>to <cyan>%arg-2%" to player
+                            send "{@prefix} <white>You have received <yellow>%arg-3% {@name} <white>from <cyan>%player%" to arg-2
                             play sound "entity.experience_orb.pickup" with volume 0.5 to player
                             play sound "entity.experence_orb.pickup" with volume 0.5 to arg-2
                         else:
-                            send "{@prefix} &cYou cannot send negative numbers" to player
-                            play sound "entity.villager.no" with volume 0.5 to player
+                            send "{@prefix} <red>You cannot send negative numbers" to player
+                            {@no} to player
                     else:
-                        send "{@prefix} &cYou don't have enough money to send this much" to player
-                        play sound "entity.villager.no" with volume 0.5 to player
+                        send "{@prefix} <red>You don't have enough money to send this much" to player
+                        {@no} to player
+
+on tab complete of "eco":
+    set tab completion for position 1 to "balance", "pay"
 
 command /ecoadmin [<text>] [<player>] [<integer>]:
     permission: eco.admin
@@ -53,7 +60,44 @@ command /ecoadmin [<text>] [<player>] [<integer>]:
                 if arg-3 is set:
                     if arg-3 > 0:
                         addBalance(arg-2, arg-3)
-                        send "{@prefix} Added &e10 {@name} &fto %arg-2%'s balance"
+                        send "{@prefix} Added <yellow>10 {@name} <white>to <cyan>%arg-2%'s <white>balance"
+                    else:
+                        send "{@prefix} <red>You can't add a negative number"
+                        {@no} to player
+                else:
+                    send "{@prefix} <red>Please set an amount"
+                    {@no} to player
+        if arg-1 is "set":
+            if arg-2 is set:
+                if arg-3 is set:
+                    setBalance(arg-2, arg-3)
+                    send "{@prefix} You have set <cyan>%arg-2%'s <white>balance to <yellow>%arg-3% {@name}"
+                else:
+                    send "{@prefix} <red>Please set an amount"
+                    {@no} to player
+        if arg-1 is "remove":
+            if arg-2 is set:
+                if arg-3 is set:
+                    if arg-3 > 0:
+                        removeBalance(arg-2, arg-3)
+                        send "{@prefix} You have removed <yellow>%arg-3% {@name} <white>from <cyan>%arg-2%'s <white>balance"
+                    else:
+                        send "{@prefix} <red>You can't remove a negative number"
+                        {@no} to player
+                else:
+                    send "{@prefix} <red>Please set an amount"
+                    {@no} to player
+        if arg-1 is "reset":
+            if arg-2 is set:
+                set {balance::%arg-2's uuid%} to {@starter_balance}
+                send "{@prefix} You have reset <cyan>%arg-2%'s <white>balance"
+            else:
+                send "{@prefix} <red>Please set a player"
+                {@no} to player
+
+on tab complete of "ecoadmin":
+    set tab completion for position 1 to "add", "remove", "set", "reset"
+                
 
 command /baltop:
     trigger:
