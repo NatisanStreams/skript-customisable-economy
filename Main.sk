@@ -1,3 +1,18 @@
+placeholderapi placeholder with the prefix "skript":
+    if the identifier is "balance":
+        set the result to {balance::%player's uuid%}
+
+
+function getBalance(p: offlineplayer):: integer:
+    return {balance::%{_p}'s uuid%}
+
+function addBalance(p: offlineplayer, amount: integer):
+    add {_amount} to {balance::%{_p}'s uuid%}
+
+function removeBalance(p: offlineplayer, amount: integer):
+    remove {_amount} from {balance::%{_p}'s uuid%}
+
+
 options:
     starter_balance: 0
     name: &eCoins
@@ -8,7 +23,7 @@ on join:
         set {balance::%player's uuid%} to {@starter_balance}
 
 
-command /coins [<text>] [<player>] [<integer>]:
+command /eco [<text>] [<player>] [<integer>]:
     trigger:
         if arg-1 is "balance":
             send "{@prefix} &fYour balance is %{balance::%player's uuid%}% {@name}" to player
@@ -17,8 +32,8 @@ command /coins [<text>] [<player>] [<integer>]:
                 if arg-3 is set:
                     if arg-3 is less than or equal to {balance::%player's uuid%}:
                         if arg-3 is more than 0:
-                            remove arg-3 from {balance::%player's uuid%}
-                            add arg-3 to {balance::%arg-2's uuid%}
+                            removeBalance(player, arg-3)
+                            addBalance(arg-2, arg-3)
                             send "{@prefix} &fYou have sent &e%arg-3% {@name} &fto %arg-2%" to player
                             send "{@prefix} &fYou have received &e%arg-3% {@name} &ffrom %player%"
                             play sound "entity.experience_orb.pickup" with volume 0.5 to player
@@ -29,3 +44,20 @@ command /coins [<text>] [<player>] [<integer>]:
                     else:
                         send "{@prefix} &cYou don't have enough money to send this much" to player
                         play sound "entity.villager.no" with volume 0.5 to player
+
+command /ecoadmin [<text>] [<player>] [<integer>]:
+    permission: eco.admin
+    trigger:
+        if arg-1 is "add":
+            if arg-2 is set:
+                if arg-3 is set:
+                    if arg-3 > 0:
+                        addBalance(arg-2, arg-3)
+                        send "{@prefix} Added &e10 {@name} &fto %arg-2%'s balance"
+
+command /baltop:
+    trigger:
+        set {_sorted::*} to sorted indices of {balance::*} in descending order
+        send "&b---Baltop---"
+        loop first 10 elements of {_sorted::*}:
+            send "&6%loop-iteration%. &f%offlineplayer(loop-value)% &7- &a$%{balance::%loop-value%}%"
