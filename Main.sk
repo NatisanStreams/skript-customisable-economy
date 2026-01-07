@@ -17,10 +17,11 @@ function setBalance(p: offlineplayer, amount: integer):
 
 
 options:
-    starter_balance: 0
-    name: <white>Coins
-    prefix: <white>[<yellow>ECONOMY<white>]
-    no: play sound "entity.villager.no" with volume 0.5
+    starter_balance: 0 # the amount of coins you want people to start with 
+    name: <white>Coins # The name of the currency
+    prefix: <white>[<yellow>ECONOMY<white>] # the prefix that shows up for messages
+    no: play sound "entity.villager.no" with volume 0.5 # OPTIONAL error sound (delete if you dont want it)
+    baltopcount: 10 # The amount of players to show in /baltop
 
 on join:
     if {balance::%player's uuid%} is not set:
@@ -102,6 +103,6 @@ on tab complete of "ecoadmin":
 command /baltop:
     trigger:
         set {_sorted::*} to sorted indices of {balance::*} in descending order
-        send "&b---Baltop---"
-        loop first 10 elements of {_sorted::*}:
+        send "&---Baltop---"
+        loop first {@baltopcount} elements of {_sorted::*}:
             send "&6%loop-iteration%. &f%offlineplayer(loop-value)% &7- &a$%{balance::%loop-value%}%"
