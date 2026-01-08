@@ -1,3 +1,13 @@
+# MADE BY NATISAN (optional support donation: https://ko-fi.com/natisan)
+
+# Economy skript
+# This skript adds a simple economy system with commands like /eco and /ecoadmin (feel free to change the name of the commands as you see fit)
+
+# REQUIRED ADDONS:
+#   PlaceholderAPI (IF YOU WANT THE PLACEHOLDERS, if not, delete the placeholders lines)
+#   SkBee
+
+
 placeholderapi placeholder with the prefix "skript":
     if the identifier is "balance":
         set the result to {balance::%player's uuid%}
@@ -20,14 +30,18 @@ options:
     starter_balance: 0 # the amount of coins you want people to start with 
     name: <white>Coins # The name of the currency
     prefix: <white>[<yellow>ECONOMY<white>] # the prefix that shows up for messages
-    no: play sound "entity.villager.no" with volume 0.5 # OPTIONAL error sound (delete if you dont want it)
+    no: play sound "entity.villager.no" with volume 0.5 # OPTIONAL error sound (delete if you dont want it and delete the "{@no} to player" lines)
     baltopcount: 10 # The amount of players to show in /baltop
 
+# Detects if the player has a balance set, if not, it'll give them the starter balance (mainly for first joins)
 on join:
     if {balance::%player's uuid%} is not set:
         set {balance::%player's uuid%} to {@starter_balance}
 
 
+# Commands:
+# /eco balance - shows the player's balance
+# /eco pay <player> <amount> - pays another player
 command /eco [<text>] [<player>] [<integer>]:
     trigger:
         if arg-1 is "balance":
@@ -53,6 +67,11 @@ command /eco [<text>] [<player>] [<integer>]:
 on tab complete of "eco":
     set tab completion for position 1 to "balance", "pay"
 
+# Admin commands:
+# /ecoadmin add <player> <amount> - adds money to a player's balance
+# /ecoadmin remove <player> <amount> - removes money from a player's balance
+# /ecoadmin set <player> <amount> - sets a player's balance
+# /ecoadmin reset <player> - resets a player's balance to the starter balance option
 command /ecoadmin [<text>] [<player>] [<integer>]:
     permission: eco.admin
     trigger:
@@ -100,9 +119,10 @@ on tab complete of "ecoadmin":
     set tab completion for position 1 to "add", "remove", "set", "reset"
                 
 
+# /baltop - shows the top balances - edit the "baltopcount" option to change how many players show
 command /baltop:
     trigger:
         set {_sorted::*} to sorted indices of {balance::*} in descending order
-        send "&---Baltop---"
+        send "<cyan>---Baltop---"
         loop first {@baltopcount} elements of {_sorted::*}:
-            send "&6%loop-iteration%. &f%offlineplayer(loop-value)% &7- &a$%{balance::%loop-value%}%"
+            send "<gold>%loop-iteration%. <white>%offlineplayer(loop-value)% <gray>- <lime>$%{balance::%loop-value%}%"
